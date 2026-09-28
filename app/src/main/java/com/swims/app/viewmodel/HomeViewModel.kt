@@ -7,8 +7,11 @@ import com.swims.app.data.model.DrinkType
 import com.swims.app.data.model.IntakeLog
 import com.swims.app.data.model.UserProfile
 import com.swims.app.data.repository.SwimsRepository
+import com.swims.app.ml.HydrationSafety
 import com.swims.app.network.WeatherManager
 import com.swims.app.widget.SwimsWidgetProvider
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -67,6 +70,29 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
                 "🧣 $t°C in $where$offline · chilly — don't forget to sip"
             else ->
                 "🌡️ $t°C in $where$offline · comfortable — normal goal"
+        }
+    }
+
+    /** Over-hydration state for today; NORMAL unless the user is well past goal. */
+    private val _safety = MutableLiveData(HydrationSafety.Check(HydrationSafety.Level.NORMAL))
+    val safety: LiveData<HydrationSafety.Check> = _safety
+
+    private var safetyJob: Job? = null
+
+    /**
+     * Re-evaluates the over-hydration state.
+     *
+     * Three separate observers can drive a re-render in quick succession, so
+     * without cancelling the previous request several DB reads race and the
+     * LAST one to finish wins — which is not necessarily the most recent one.
+     * Cancelling makes the newest request authoritative.
+     */
+    fun refreshSafety(goalMl: Int) {
+        safetyJob?.cancel()
+        safetyJob = viewModelScope.launch {
+            val result = repo.safetyCheck(goalMl)
+            ensureActive()               // a newer request superseded this one
+            _safety.postValue(result)
         }
     }
 

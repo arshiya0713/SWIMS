@@ -167,7 +167,29 @@ object AnomalyDetector {
     private const val Z_THRESHOLD = 1.25
 
     /** Returns the days whose total is significantly below the user's norm. */
-    fun lowDays(history: List<DayRecord>): List<DayRecord> {
+    fun lowDays(history: List<DayRecord>): List<DayRecord> =
+        outliers(history) { total, mean, sd ->
+            total < mean - Z_THRESHOLD * sd && total < mean * 0.75
+        }
+
+    /**
+     * Returns the days whose total is significantly ABOVE the user's norm.
+     *
+     * The mirror image of [lowDays]: the same z-score test on the upper tail.
+     * A consistently high drinker is not flagged — only days that stand out
+     * against that person's own baseline — so this catches a one-off binge
+     * rather than a naturally high requirement.
+     */
+    fun highDays(history: List<DayRecord>): List<DayRecord> =
+        outliers(history) { total, mean, sd ->
+            total > mean + Z_THRESHOLD * sd && total > mean * 1.25
+        }
+
+    /** Shared z-score scaffolding for both tails. */
+    private inline fun outliers(
+        history: List<DayRecord>,
+        predicate: (total: Int, mean: Double, sd: Double) -> Boolean,
+    ): List<DayRecord> {
         val active = history.filter { it.totalMl > 0 }
         if (active.size < MIN_HISTORY_DAYS) return emptyList()
 
@@ -176,7 +198,75 @@ object AnomalyDetector {
         val sd = sqrt(variance)
         if (sd < 1.0) return emptyList() // perfectly consistent user — nothing to flag
 
-        return active.filter { it.totalMl < mean - Z_THRESHOLD * sd && it.totalMl < mean * 0.75 }
+        return active.filter { predicate(it.totalMl, mean, sd) }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 4b. Over-hydration safety — the upper bound on intake.
+//
+// Every other model in this file is trying to get the user to drink MORE.
+// This one is the counterweight. Drinking far past requirement dilutes blood
+// sodium, and the kidneys can only clear roughly 0.8–1.0 litres per hour, so
+// both the daily total and the short-term RATE matter.
+//
+// Thresholds are deliberately absolute rather than scaled to the personal
+// goal: physiology does not care what target the app has learned. The only
+// goal-relative rule is a suppression one — never warn a user who is still
+// below their own goal, so a high-requirement athlete is not nagged.
+// ─────────────────────────────────────────────────────────────────────────────
+object HydrationSafety {
+
+    /** Past this in one day, extra water stops helping. */
+    const val DAILY_CAUTION_ML = 4000
+
+    /** Well beyond any normal daily requirement. */
+    const val DAILY_HIGH_ML = 6000
+
+    /** Roughly the renal clearance ceiling — drinking faster than this backs up. */
+    const val HOURLY_CAUTION_ML = 1000
+
+    enum class Level { NORMAL, CAUTION, HIGH }
+
+    data class Check(val level: Level, val message: String? = null) {
+        val isWarning: Boolean get() = level != Level.NORMAL
+    }
+
+    private val normal = Check(Level.NORMAL)
+
+    /**
+     * Evaluates today's intake for over-hydration.
+     *
+     * @param todayTotalMl hydration-credited ml logged today
+     * @param goalMl       the goal actually in effect (adaptive + weather)
+     * @param lastHourMl   hydration-credited ml logged in the last 60 minutes
+     */
+    fun check(todayTotalMl: Int, goalMl: Int, lastHourMl: Int): Check {
+        // Rate check first: a litre in an hour matters even on a low day total.
+        if (lastHourMl >= HOURLY_CAUTION_ML) {
+            return Check(
+                Level.CAUTION,
+                "That's $lastHourMl ml in the last hour. Your kidneys clear about " +
+                    "a litre an hour — spread the next one out a bit."
+            )
+        }
+
+        // Daily checks never fire while the user is still short of their goal.
+        if (todayTotalMl <= goalMl) return normal
+
+        return when {
+            todayTotalMl >= DAILY_HIGH_ML -> Check(
+                Level.HIGH,
+                "$todayTotalMl ml today is well past what your body can use. " +
+                    "Worth easing off for the rest of the day."
+            )
+            todayTotalMl >= DAILY_CAUTION_ML -> Check(
+                Level.CAUTION,
+                "You're ${todayTotalMl - goalMl} ml past your goal. " +
+                    "More water won't add much from here."
+            )
+            else -> normal
+        }
     }
 }
 

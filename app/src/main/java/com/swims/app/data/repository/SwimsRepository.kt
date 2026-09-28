@@ -13,6 +13,7 @@ import com.swims.app.data.model.BanditDecisionRecord
 import com.swims.app.ml.AdaptiveGoalEngine
 import com.swims.app.ml.DayRecord
 import com.swims.app.ml.DrinkingPatternModel
+import com.swims.app.ml.HydrationSafety
 import com.swims.app.ml.InsightGenerator
 import com.swims.app.ml.LogPoint
 import com.swims.app.ml.MIN_HISTORY_DAYS
@@ -170,6 +171,23 @@ class SwimsRepository(private val dao: SwimsDao) {
     fun effectiveGoal(profile: UserProfile): Int =
         if (profile.smartFeaturesEnabled && profile.adaptiveGoalMl > 0) profile.adaptiveGoalMl
         else profile.dailyGoalMl
+
+    /**
+     * Over-hydration check for right now: today's credited total plus the
+     * amount logged in the last hour, so a fast burst is caught even when the
+     * day's total is still modest.
+     *
+     * [goalMl] is the goal actually on screen (weather-adjusted when known),
+     * because a warning must never fire while the user is below their target.
+     */
+    suspend fun safetyCheck(goalMl: Int): HydrationSafety.Check {
+        val now = System.currentTimeMillis()
+        return HydrationSafety.check(
+            todayTotalMl = dao.getTotalForDate(today()),
+            goalMl = goalMl,
+            lastHourMl = dao.getHydrationBetween(now - 60 * 60 * 1000L, now),
+        )
+    }
 
     /**
      * Re-learns the adaptive goal from the last 28 completed days and persists

@@ -23,6 +23,7 @@ import com.swims.app.data.model.DrinkType
 import com.swims.app.databinding.DialogLogDrinkBinding
 import com.swims.app.databinding.DialogSmartLogBinding
 import com.swims.app.databinding.FragmentHomeBinding
+import com.swims.app.ml.HydrationSafety
 import com.swims.app.ml.nlp.DrinkTextParser
 import com.swims.app.ml.vision.DrinkImageClassifier
 import com.swims.app.viewmodel.HomeViewModel
@@ -89,6 +90,10 @@ class HomeFragment : Fragment() {
             binding.tvStreak.text = "🔥 $streak"
         }
 
+        // Over-hydration state. Only re-renders the status line — it must not
+        // call renderProgress(), which is what refreshes this value.
+        vm.safety.observe(viewLifecycleOwner) { applyStatus() }
+
         // Log list
         val adapter = LogAdapter { log -> vm.deleteLog(log) }
         binding.rvLogs.adapter = adapter
@@ -131,16 +136,53 @@ class HomeFragment : Fragment() {
 
         val wasReached = goalReached
         goalReached = total >= goal
-        binding.tvStatus.text = when {
-            goalReached -> "🎉 Goal smashed! Amazing!"
-            percent >= 75 -> "Almost there — ${goal - total} ml to go 💪"
-            percent >= 40 -> "Nice pace! ${goal - total} ml left"
-            total > 0 -> "${goal - total} ml to go — keep sipping 💧"
-            else -> "Let's fill it up! 💧"
-        }
+        lastTotal = total
+        lastGoal = goal
+        lastPercent = percent
+
+        vm.refreshSafety(goal)   // async; the observer re-runs applyStatus()
+        applyStatus()
+
         if (goalReached && !wasReached && total > 0 && userJustLogged) {
             userJustLogged = false
             celebrate()
+        }
+    }
+
+    // Last rendered figures, so the safety observer can redraw the status line
+    // without re-entering renderProgress().
+    private var lastTotal = 0
+    private var lastGoal = 2500
+    private var lastPercent = 0
+
+    /**
+     * Writes the status line. An over-hydration warning takes priority over the
+     * encouragement copy — telling someone to "keep sipping" at 6 litres would
+     * be actively wrong.
+     */
+    private fun applyStatus() {
+        val warning = vm.safety.value
+        if (warning != null && warning.isWarning && warning.message != null) {
+            binding.tvStatus.text = warning.message
+            binding.tvStatus.setTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    if (warning.level == HydrationSafety.Level.HIGH) R.color.error_red
+                    else R.color.accent_amber
+                )
+            )
+            return
+        }
+
+        binding.tvStatus.setTextColor(
+            ContextCompat.getColor(requireContext(), R.color.text_primary)
+        )
+        binding.tvStatus.text = when {
+            lastTotal >= lastGoal -> "🎉 Goal smashed! Amazing!"
+            lastPercent >= 75 -> "Almost there — ${lastGoal - lastTotal} ml to go 💪"
+            lastPercent >= 40 -> "Nice pace! ${lastGoal - lastTotal} ml left"
+            lastTotal > 0 -> "${lastGoal - lastTotal} ml to go — keep sipping 💧"
+            else -> "Let's fill it up! 💧"
         }
     }
 
