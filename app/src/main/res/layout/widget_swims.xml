@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home-screen widget. RemoteViews-safe views only. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:background="@drawable/bg_widget"
+    android:padding="14dp">
+
+    <TextView
+        android:id="@+id/tv_w_percent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="💧 0%"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp">
+
+        <TextView
+            android:id="@+id/tv_w_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 / 0 ml"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF" />
+
+        <ProgressBar
+            android:id="@+id/pb_w"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:max="100"
+            android:progress="0"
+            android:progressTint="#FFFFFF"
+            android:progressBackgroundTint="#66FFFFFF" />
+
+        <TextView
+            android:id="@+id/tv_w_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SWIMS · tap to open"
+            android:textSize="10sp"
+            android:textColor="#CFF3FA"
+            android:layout_marginTop="3dp" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_w_add"
+        android:layout_width="wrap_content"
+        android:layout_height="44dp"
+        android:minWidth="72dp"
+        android:background="@drawable/bg_widget_btn"
+        android:text="+250 ml"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:textColor="#4C1D95" />
+
+</LinearLayout>

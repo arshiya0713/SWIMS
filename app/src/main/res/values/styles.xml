@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Chunky tonal pill for quick-add amounts -->
+    <style name="QuickAddPill" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="backgroundTint">@color/chip_bg</item>
+        <item name="android:textColor">@color/aqua_deep</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">16sp</item>
+        <item name="cornerRadius">22dp</item>
+        <item name="rippleColor">@color/blue_light</item>
+        <item name="android:stateListAnimator">@animator/button_bounce</item>
+        <item name="android:letterSpacing">0.01</item>
+    </style>
+
+    <!-- Prominent filled cyan pill — dark text for contrast on electric cyan -->
+    <style name="PrimaryPill" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="backgroundTint">@color/blue_primary</item>
+        <item name="android:textColor">#081C33</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">16sp</item>
+        <item name="cornerRadius">26dp</item>
+        <item name="android:stateListAnimator">@animator/button_bounce</item>
+    </style>
+
+    <!-- Section heading -->
+    <style name="SectionHeading">
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+</resources>

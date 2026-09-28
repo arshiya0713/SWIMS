@@ -1,0 +1,56 @@
+rules_version = '2';
+
+// SWIMS — Firestore security rules
+//
+// These replace the expiring "test mode" defaults. Publish them at:
+//   https://console.firebase.google.com/project/swims-d6523/firestore/rules
+//
+// The app touches exactly two collections; everything else is denied by the
+// implicit default, so there is no catch-all allow anywhere below.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Per-user data ────────────────────────────────────────────────────
+    //   users/{uid}/profile/main      the single profile row
+    //   users/{uid}/logs/{timestamp}  one document per intake log
+    //
+    // A signed-in user may read and write only their own subtree, whether
+    // they signed in anonymously or with email/password (an anonymous
+    // account keeps its uid when it is linked to an email, so history
+    // survives the upgrade). Nobody can read anyone else's hydration
+    // history, and an unauthenticated client gets nothing at all.
+    //
+    // Delete is permitted because "Delete all my data" removes the cloud
+    // copy as well as the local one.
+    match /users/{uid}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // ── Federated policy aggregates ──────────────────────────────────────
+    //   federated_policy/{contextKey__arm}
+    //
+    // Running sums of Beta pseudo-counts, written with FieldValue.increment()
+    // so the server only ever stores the population total — there are no
+    // per-user rows here and nothing is attributable to an individual.
+    // Readable by any signed-in device, which is what makes the cold-start
+    // benefit work.
+    match /federated_policy/{docId} {
+      allow read: if request.auth != null;
+
+      // Writes are constrained to the exact shape the client sends, so a
+      // compromised client cannot smuggle extra fields into the aggregate.
+      allow create, update: if request.auth != null
+        && request.resource.data.keys().hasOnly(
+             ['contextKey', 'arm', 'alphaSum', 'betaSum', 'contributions'])
+        && request.resource.data.contextKey is string
+        && request.resource.data.arm is int
+        && request.resource.data.alphaSum is number
+        && request.resource.data.betaSum is number
+        && request.resource.data.contributions is int;
+
+      // Aggregates are append-only: no client may erase population history.
+      allow delete: if false;
+    }
+  }
+}

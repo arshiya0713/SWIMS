@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Offline-first app with optional online features (weather, cloud sync).
+    All cleartext (HTTP) traffic is blocked — only HTTPS to system-trusted
+    hosts is allowed. If there is no network, every feature falls back to
+    its offline behaviour.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

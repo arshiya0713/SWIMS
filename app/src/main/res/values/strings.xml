@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SWIMS</string>
+    <string name="widget_description">Live hydration progress with one-tap quick add</string>
+    <string name="app_full_name">Smart Water Intake Monitoring System</string>
+    <string name="reminder_title">Time to hydrate! 💧</string>
+    <string name="reminder_body">Log your water intake and stay on track today.</string>
+    <string name="medical_disclaimer">SWIMS provides general hydration tracking and personalized estimates for informational purposes only. It is not medical advice and does not diagnose, treat, or prevent any medical condition. Hydration needs can vary significantly between individuals. Users with medical conditions or specific fluid restrictions should follow guidance from their healthcare professional.</string>
+</resources>

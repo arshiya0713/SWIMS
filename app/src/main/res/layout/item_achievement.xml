@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_achievement"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="6dp">
+
+    <TextView
+        android:id="@+id/tv_badge"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:background="@drawable/bg_drop_circle"
+        android:gravity="center"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/tv_badge_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="10.5sp"
+        android:textColor="@color/text_secondary"
+        android:gravity="center"
+        android:maxLines="2"
+        android:layout_marginTop="4dp" />
+
+</LinearLayout>

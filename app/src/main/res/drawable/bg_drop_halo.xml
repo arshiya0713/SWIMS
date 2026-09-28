@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Soft cyan halo sitting behind the water drop, so it reads as glowing
+     from within rather than being pasted onto the header. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <gradient
+        android:type="radial"
+        android:startColor="#7A22D3EE"
+        android:centerColor="#3322D3EE"
+        android:endColor="#0022D3EE"
+        android:gradientRadius="130dp"
+        android:centerX="0.5"
+        android:centerY="0.5" />
+</shape>

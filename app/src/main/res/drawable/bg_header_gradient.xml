@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Aurora mesh header: a deep base with three overlapping radial "glow orbs"
+    (violet, magenta, cyan) instead of a single flat linear sweep. The offset
+    centres and differing radii keep the colour moving across the surface, which
+    reads as depth rather than a plain fade.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Base: deep indigo → plum, diagonal -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#14103C"
+                android:centerColor="#2B1264"
+                android:endColor="#3B1D6E"
+                android:angle="135" />
+            <corners
+                android:bottomLeftRadius="36dp"
+                android:bottomRightRadius="36dp" />
+        </shape>
+    </item>
+
+    <!-- Glow 1: violet, upper-left -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="radial"
+                android:startColor="#B38B5CF6"
+                android:endColor="#008B5CF6"
+                android:gradientRadius="300dp"
+                android:centerX="0.12"
+                android:centerY="0.08" />
+            <corners
+                android:bottomLeftRadius="36dp"
+                android:bottomRightRadius="36dp" />
+        </shape>
+    </item>
+
+    <!-- Glow 2: magenta, upper-right -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="radial"
+                android:startColor="#8CD946EF"
+                android:endColor="#00D946EF"
+                android:gradientRadius="260dp"
+                android:centerX="0.92"
+                android:centerY="0.18" />
+            <corners
+                android:bottomLeftRadius="36dp"
+                android:bottomRightRadius="36dp" />
+        </shape>
+    </item>
+
+    <!-- Glow 3: electric cyan, lower-centre — lifts the water drop -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="radial"
+                android:startColor="#7A22D3EE"
+                android:endColor="#0022D3EE"
+                android:gradientRadius="320dp"
+                android:centerX="0.5"
+                android:centerY="1.02" />
+            <corners
+                android:bottomLeftRadius="36dp"
+                android:bottomRightRadius="36dp" />
+        </shape>
+    </item>
+
+    <!-- Glow 4: deep blue wash, lower-left for balance -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="radial"
+                android:startColor="#663B82F6"
+                android:endColor="#003B82F6"
+                android:gradientRadius="240dp"
+                android:centerX="0.05"
+                android:centerY="0.9" />
+            <corners
+                android:bottomLeftRadius="36dp"
+                android:bottomRightRadius="36dp" />
+        </shape>
+    </item>
+
+</layer-list>

@@ -1,0 +1,18 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+build/
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+# Never commit the encrypted DB passphrase or keystore
+*.jks
+*.keystore
+
+# Firebase config — contains your project's API key. The app builds and runs
+# fine without this file (cloud features just stay off); each developer/CI
+# machine should drop their own copy in app/ locally. See README.
+/app/google-services.json

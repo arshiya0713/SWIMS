@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Exclude the encrypted database and all preferences from Google cloud backup.
+    User health data never leaves the device.
+-->
+<full-backup-content>
+    <exclude domain="database" path="swims_encrypted.db" />
+    <exclude domain="database" path="swims_encrypted.db-shm" />
+    <exclude domain="database" path="swims_encrypted.db-wal" />
+    <exclude domain="sharedpref" path="." />
+</full-backup-content>
